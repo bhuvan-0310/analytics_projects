@@ -21,16 +21,26 @@ df = pd.read_csv('Crop_recommendation (1).csv')
 df.head()
 df.describe()
 
+"""Heatmap plotted to check the null values"""
+
 sns.heatmap(df.isnull(),cmap="coolwarm")
 plt.show()
 
-plt.figure(figsize=(12,5))
-plt.subplot(1, 2, 1)
-sns.distplot(df['temperature'],color="purple",bins=15,hist_kws={'alpha':0.2})
-plt.subplot(1, 2, 2)
-sns.distplot(df['ph'],color="green",bins=15,hist_kws={'alpha':0.2})
+"""Heatmap plotted to check the magnitude of values over the dataset"""
+
+numerical_df = df.select_dtypes(include=['float', 'int'])
+
+# plotting the heatmap
+sns.heatmap(numerical_df,
+            annot=True)
+plt.show()
+
+"""Plotting countplot to chek the balance in the dataset"""
 
 sns.countplot(y='label',data=df, palette="plasma_r")
+
+"""To check the diagonal relationship between two different column values"""
+
 sns.pairplot(df, hue = 'label')
 
 #Jointplot for rainfall and humidity
@@ -42,9 +52,11 @@ sns.jointplot(x="K",y="N",data=df[(df['N']>40)&(df['K']>40)],hue="label")
 #Jointplot between Potassium and humidity
 sns.jointplot(x="K",y="humidity",data=df,hue='label',size=8,s=30,alpha=0.7)
 
-sns.boxplot(y='label',x='P',data=df[df['rainfall']>150])
+"""When the rainfall is above 150, we can analyze the the levels of Potassium, Nitrogen and Phospohorus required."""
 
-sns.lineplot(data = df[(df['humidity']<65)], x = "K", y = "rainfall",hue="label")
+sns.boxplot(y='label',x='P',data=df[df['rainfall']>150])
+sns.boxplot(y='label',x='K',data=df[df['rainfall']>150])
+sns.boxplot(y='label',x='N',data=df[df['rainfall']>150])
 
 # Data Preprocessing
 
@@ -59,6 +71,8 @@ X=df[['N','P','K','temperature','humidity','ph','rainfall']]
 
 sns.heatmap(X.corr())
 
+"""Training the dataset"""
+
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 
@@ -68,6 +82,8 @@ scaler = MinMaxScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 
 X_test_scaled = scaler.transform(X_test)
+
+"""Applying KNN classification"""
 
 from sklearn.neighbors import KNeighborsClassifier
 knn = KNeighborsClassifier()
